@@ -1,56 +1,283 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Portfolio</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rishabh Bharti — Portfolio</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root { --glass: rgba(255,255,255,0.06); }
+    body{
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background: linear-gradient(120deg,#0f172a 0%, #1e293b 30%, #0ea5e9 60%, #6366f1 100%);
+      background-size:300% 300%;
+      animation:bgmove 12s ease infinite;
+      color:#fff;
+    }
+    @keyframes bgmove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .glass{ background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.06); }
+    .card{ transition:transform .35s, box-shadow .35s; }
+    .card:hover{ transform: translateY(-10px); box-shadow:0 20px 50px rgba(2,6,23,0.55); }
+
+    /* Cube stage */
+    .cube-stage { perspective: 1400px; perspective-origin: 50% 45%; }
+    .cube {
+      width: 280px; height: 280px;
+      position: relative; margin: 0 auto;
+      transform-style: preserve-3d;
+      transform: rotateX(-25deg) rotateY(30deg);
+      transition: transform .8s cubic-bezier(.2,.9,.4,1);
+      animation: cubeSpin 12s linear infinite;
+    }
+    @keyframes cubeSpin {
+      0%{ transform: rotateX(-25deg) rotateY(0deg); }
+      100%{ transform: rotateX(-25deg) rotateY(360deg); }
+    }
+    .cube.pause { animation-play-state: paused; }
+
+    /* each face */
+    .face {
+      position: absolute; width: 280px; height: 280px;
+      left: 0; top: 0;
+      backface-visibility: hidden;
+      background-size: cover;
+      background-position: center;
+      border-radius: 12px; box-shadow: 0 12px 30px rgba(2,6,23,0.45);
+      overflow: hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .face::after{
+      content:""; position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.15));
+    }
+
+    /* place faces in 3D */
+    .face.front  { transform: translateZ(140px); }
+    .face.back   { transform: rotateY(180deg) translateZ(140px); }
+    .face.right  { transform: rotateY(90deg) translateZ(140px); }
+    .face.left   { transform: rotateY(-90deg) translateZ(140px); }
+    .face.top    { transform: rotateX(90deg) translateZ(140px); }
+    .face.bottom { transform: rotateX(-90deg) translateZ(140px); }
+
+    /* hover: pause spin and tilt cube with mouse */
+    .cube-stage:hover .cube { animation-play-state: paused; transform: rotateX(-10deg) rotateY(20deg) scale(1.05); }
+
+    /* chat widget styles */
+    .chat-toggle { position: fixed; right: 24px; bottom: 24px; z-index:70; display:grid; gap:8px; }
+    .chat-button { width:64px; height:64px; border-radius:999px; display:grid; place-items:center; box-shadow:0 10px 30px rgba(2,6,23,0.45); cursor:pointer; }
+    .chat-box { position: fixed; right: 24px; bottom: 100px; width: 360px; max-width: calc(100% - 48px); z-index:80; display:none; }
+    .chat-box.open{ display:block; }
+    .chat-scroller{ height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:12px; }
+    .msg{ padding:.6rem .75rem; border-radius:12px; max-width:78%; line-height:1.3;}
+    .msg.bot{ background: rgba(255,255,255,0.06); color:#fff; border:1px solid rgba(255,255,255,0.04);}
+    .msg.user{ background: rgba(255,255,255,0.95); color:#0b1220; align-self:flex-end; }
+
+    /* responsiveness */
+    @media (max-width:768px){
+      .cube{ width:220px; height:220px; }
+      .face{ width:220px; height:220px; }
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <img src="photo.jpg" alt="My Photo" class="profile-img" />
-      <h1>Rishabh Bharti</h1>
-      <p>Full stack developer | Cyber security | Coder</p>
+
+  <!-- Header -->
+  <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl flex items-center justify-center glass">
+        <span class="font-bold text-lg">RB</span>
+      </div>
+      <div>
+        <h1 class="text-xl font-semibold">Rishabh Bharti</h1>
+        <p class="text-xs opacity-80">B.Tech • Full Stack Developer & Cybersecurity</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button id="themeToggle" class="px-3 py-2 rounded-md glass text-sm hover:scale-105 transition">Toggle Theme</button>
+      <a href="https://drive.google.com/file/d/1VeYiwcC6goAggJis52mj5pP4jHCQWC9c/view?usp=drivesdk" target="_blank" class="glass px-3 py-2 rounded-md text-sm hover:scale-105 transition">Download CV</a>
     </div>
   </header>
 
-  <section class="about">
-    <div class="container">
-      <h2>About Me</h2>
-      <p>Hello! My self Rishabh bharti currently pursuing my btech from Rajkiya Engineering college azamgarh in Information Technology.</p>
-      <p>"Being an IT student is not just about studying technology—it's about imagining what's possible, learning how to build it, and never being afraid to fail along the way."</p>
-    </div>
-  </section>
+  <!-- Main -->
+  <main class="max-w-6xl mx-auto px-6 pb-20">
+    <section class="grid md:grid-cols-2 gap-8 items-center">
+      <div>
+        <h2 class="text-4xl font-extrabold leading-tight">Hi, I'm <span class="text-indigo-300">Rishabh</span></h2>
+        <p class="text-lg opacity-90 max-w-xl mt-4">Student & Full Stack Developer with cyber security experience. I build MERN apps, automation tools in Python, and work on secure systems.</p>
+        <div class="flex gap-3 mt-6">
+          <a href="mailto:rishabhbharti840059@gmail.com" class="px-5 py-3 rounded-lg glass">Email Me</a>
+          <a href="https://github.com/rishabhbharti840059-hub" target="_blank" class="px-5 py-3 rounded-lg glass">GitHub</a>
+        </div>
+      </div>
 
-  <section class="projects">
-    <div class="container">
-      <h2>Projects</h2>
-      <ul>
-        <li>📱Automated Attendence System</li>
-        <li>💼 college website Website</li>
-        <li>🛒 E-commerce Website</li>
-      </ul>
-    </div>
-  </section>
+      <!-- Cube with your image on all faces -->
+      <div class="cube-stage">
+        <div class="cube" id="cube">
+          <!-- NOTE: the image filename must be in the same folder as this HTML.
+               I used the uploaded name exactly below. If your file has a different name, update the URL. -->
+          <div class="face front"  style="background-image: url('my.jpg');"></div>
+          <div class="face back"   style="background-image: url('my.jpg');"></div>
+          <div class="face right"  style="background-image: url('my.jpg');"></div>
+          <div class="face left"   style="background-image: url('my.jpg');"></div>
+          <div class="face top"    style="background-image: url('my.jpg');"></div>
+          <div class="face bottom" style="background-image: url('my.jpg');"></div>
+        </div>
 
-  <section class="contact">
-    <div class="container">
-      <h2>Contact</h2>
-      <form id="contactForm">
-        <input type="text" id="name" placeholder="Your Name" required />
-        <input type="email" id="email" placeholder="Your Email" required />
-        <textarea id="message" placeholder="Your Message" required></textarea>
-        <button type="submit">Send</button>
+        <div class="mt-6 text-center">
+          <div class="inline-block glass px-5 py-2 rounded-full">Stop</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills & Projects -->
+    <section class="mt-12 grid md:grid-cols-2 gap-8">
+      <div class="glass p-6 rounded-xl card">
+        <h3 class="text-2xl font-semibold mb-4">Skills</h3>
+        <ul class="grid grid-cols-2 gap-3 text-sm">
+          <li class="p-3 rounded-md bg-white/5">Python</li>
+          <li class="p-3 rounded-md bg-white/5">C++</li>
+          <li class="p-3 rounded-md bg-white/5">C</li>
+          <li class="p-3 rounded-md bg-white/5">Java</li>
+          <li class="p-3 rounded-md bg-white/5">Full stack Developer using mern & java</li>
+          <li class="p-3 rounded-md bg-white/5">Cyber Security</li>
+          <li class="p-3 rounded-md bg-white/5">SQL</li>
+        </ul>
+      </div>
+
+      <div class="glass p-6 rounded-xl card">
+        <h3 class="text-2xl font-semibold mb-4">Projects</h3>
+        <div class="space-y-4 text-sm">
+          <div><div class="font-medium">Automated Attendance System</div><div class="opacity-80 text-xs">Python, SQL — face/QR automation & reporting</div></div>
+          <div><div class="font-medium">Restaurant App</div><div class="opacity-80 text-xs">Authenticated web apps, REST APIs</div></div>
+          <div><div class="font-medium">Fraud detection in decentralised finance using gnn and graphical embeding</div><div class="opacity-80 text-xs">ML, Gnn, Blockchain, Di-fi</div></div>
+        </div>
+      </div>
+    </section>
+    <section class="mt-12 grid md:grid-cols-2 gap-8">
+      <div class="glass p-6 rounded-xl card">
+        <h3 class="text-2xl font-semibold mb-4">Internship(With Certificate)</h3>
+        <ul class="grid grid-cols-2 gap-3 text-sm">
+          <li class="p-3 rounded-md bg-white/5">
+            <a href="https://drive.google.com/file/d/104bmtkEBHo0H7vZTY4CwPvXVL5nx2Pm1/view?usp=drivesdk">Cdac</a></li>
+          <li class="p-3 rounded-md bg-white/5">
+            <a href="https://drive.google.com/file/d/1FabQadv7yxqkWtiu8fAG8GFCUokngRL8/view?usp=drivesdk">NIELIT</a></li>
+        </ul>
+      </div>
+
+      <div class="glass p-6 rounded-xl card">
+        <h3 class="text-2xl font-semibold mb-4">Study Backgroud</h3>
+        <div class="space-y-4 text-sm">
+          <div><div class="font-medium">Btech(REC Azamgarh)</div><div class="opacity-80 text-xs">Information Technology</div></div>
+          <div><div class="font-medium">Intermediate</div><div class="opacity-80 text-xs">GJIC GORKAHPUR(State Board)</div></div>
+          <div><div class="font-medium">High School</div><div class="opacity-80 text-xs">R.P.M.ACADEMY(ICSE)</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Chat widget -->
+  <div class="chat-toggle">
+    <div id="chatBox" class="chat-box glass rounded-xl overflow-hidden shadow-xl">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-white/6">
+        <div>
+          <div class="font-medium">Rishabh Chatbot</div>
+          <div class="text-xs opacity-80">Ask about projects, skills, or contact</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="minimizeBtn" title="Minimize" class="px-2 py-1 rounded-md glass">_</button>
+          <button id="closeBtn" title="Close" class="px-2 py-1 rounded-md glass">✕</button>
+        </div>
+      </div>
+      <div id="chatScroll" class="chat-scroller bg-transparent text-sm"></div>
+
+      <form id="chatForm" class="p-3 border-t border-white/6 flex gap-2">
+        <input id="chatInput" class="flex-1 p-3 rounded-md bg-white/5 placeholder:text-white/60 outline-none" placeholder="Type a message..." />
+        <button type="submit" class="px-4 py-2 rounded-md glass">Send</button>
       </form>
-      <p id="formMessage"></p>
     </div>
-  </section>
 
-  <footer>
-    <p>&copy; 2025 Your Name. All rights reserved.</p>
-  </footer>
+    <button id="chatToggleBtn" class="chat-button bg-gradient-to-br from-indigo-500 to-cyan-400 text-white transform hover:scale-105 transition">💬</button>
+  </div>
 
-  <script src="script.js"></script>
+  <footer class="mt-20 pb-10 text-center text-sm opacity-80">Built with ❤️ • Rishabh Bharti — <a href="mailto:rishabhbharti840059@gmail.com" class="underline">rishabhbharti840059@gmail.com</a></footer>
+
+  <script>
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    let light = false;
+    themeToggle.addEventListener('click', ()=> {
+      light = !light;
+      if(light){
+        body.style.background = "linear-gradient(120deg,#f8fafc 0%, #eef2ff 40%, #fef3c7 100%)";
+        body.style.color = "#0b1220";
+      } else {
+        body.style.background = "";
+        body.style.color = "#fff";
+      }
+    });
+
+    // cube interaction: allow drag rotate
+    const cube = document.getElementById('cube');
+    let dragging=false, lastX=0, lastY=0, rotY=0, rotX=-25;
+    cube.addEventListener('pointerdown', (e)=>{
+      dragging = true; cube.classList.add('pause'); lastX = e.clientX; lastY = e.clientY; cube.style.cursor='grabbing';
+    });
+    window.addEventListener('pointermove', (e)=>{
+      if(!dragging) return;
+      const dx = e.clientX - lastX; const dy = e.clientY - lastY;
+      rotY += dx * 0.3; rotX += dy * 0.2;
+      cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      lastX = e.clientX; lastY = e.clientY;
+    });
+    window.addEventListener('pointerup', () => { if(dragging){ dragging=false; cube.classList.remove('pause'); cube.style.cursor='grab'; } });
+
+    // Chat widget logic
+    const chatToggleBtn = document.getElementById('chatToggleBtn');
+    const chatBox = document.getElementById('chatBox');
+    const closeBtn = document.getElementById('closeBtn');
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const chatScroll = document.getElementById('chatScroll');
+
+    chatToggleBtn.addEventListener('click', ()=> { chatBox.classList.toggle('open'); if(chatBox.classList.contains('open')) chatInput.focus(); });
+    closeBtn.addEventListener('click', ()=> chatBox.classList.remove('open'));
+    minimizeBtn.addEventListener('click', ()=> chatBox.classList.toggle('open'));
+
+    const STORAGE_KEY = 'rishabh_portfolio_chat_v1';
+    function loadMessages(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){ return []; } }
+    function saveMessages(msgs){ localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs)); }
+    function appendMessage(text, who='bot'){ const row = document.createElement('div'); row.style.display='flex'; row.style.justifyContent = who==='bot' ? 'flex-start' : 'flex-end'; const bubble = document.createElement('div'); bubble.className='msg ' + (who==='bot' ? 'bot' : 'user'); bubble.textContent = text; row.appendChild(bubble); chatScroll.appendChild(row); chatScroll.scrollTop = chatScroll.scrollHeight; }
+
+    // load existing
+    const history = loadMessages();
+    if(history.length){ history.forEach(m => appendMessage(m.text, m.who)); }
+    else { appendMessage("Hi! I'm Rishabh's assistant 🤖 — ask about skills, projects, or contact.", 'bot'); saveMessages([{who:'bot', text:"Hi! I'm Rishabh's assistant 🤖 — ask about skills, projects, or contact."}]); }
+
+    function botReply(txt){
+      const t = txt.toLowerCase();
+      if(t.includes('hi')||t.includes('hello')) return "Hello! 👋 I'm Rishabh's assistant. Ask 'skills', 'projects' or 'contact'.";
+      if(t.includes('skill')) return "Skills: Python, C, Java, MERN (MongoDB, Express, React, Node), SQL, Cyber Security.";
+      if(t.includes('project') || t.includes('attendance')) return "Automated Attendance System — Python + SQL (face/QR automation) and MERN apps.";
+      if(t.includes('contact')||t.includes('email')) return "Email: rishabhbharti840059@gmail.com • Phone: 08400599894";
+      if(t.includes('resume')||t.includes('cv')) return "Download the CV using the 'Download CV' button at the top.";
+      return "Sorry, I didn't catch that. Try: 'What are your skills?', 'Tell me about projects', or 'How can I contact you?'.";
+    }
+
+    chatForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const text = chatInput.value.trim(); if(!text) return;
+      appendMessage(text, 'user');
+      const msgs = loadMessages(); msgs.push({who:'user', text}); saveMessages(msgs);
+      setTimeout(()=>{ const r = botReply(text); appendMessage(r, 'bot'); const msgs2 = loadMessages(); msgs2.push({who:'bot', text:r}); saveMessages(msgs2); }, 600);
+      chatInput.value=''; chatInput.focus();
+    });
+  </script>
 </body>
 </html>
